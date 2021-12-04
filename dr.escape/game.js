@@ -10,14 +10,16 @@ var config = {
             debug: true
         }
     },
-    // scale: {
-    //     mode: Phaser.Scale.FIT,
-    //     autoCenter: Phaser.Scale.CENTER_BOTH
-    // },
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     backgroundColor: '#aa0000',
     pixelArt: true,
     //// Add all scenes below in the array
-    scene: [preloadScene, intro, gg, introo, gameScene]
+    scene: [preloadScene, intro, gg, introo, gameScene, winScene]
 };
 
+
 var game = new Phaser.Game(config);
+window.keys = 0;

@@ -26,8 +26,10 @@ class gameScene extends Phaser.Scene {
         // VLiew NPC
         this.load.atlas('bad','assets/mpc.png','assets/mpc.json')
         this.load.atlas('keyTile','assets/keyTile.png','assets/keyTile.json')
+        this.load.atlas('keyTile3','assets/keyTile3.png','assets/keyTile3.json')
 
-        
+        this.load.image('key', 'assets/key.png')
+        this.load.image('keyTile3', 'assets/keyTile3.png')
 
 
     } // end of preload //
@@ -38,6 +40,10 @@ class gameScene extends Phaser.Scene {
     
    var map = this.make.tilemap({key:'world'});
 
+   this.pingSnd = this.sound.add('ping');
+   this.bombSnd = this.sound.add('bomb');
+   this.bgmSnd = this.sound.add('bgm');
+
 
     var tileset1= map.addTilesetImage('house','house');
     var tileset2= map.addTilesetImage('playground','playground');
@@ -46,8 +52,10 @@ class gameScene extends Phaser.Scene {
     var tileset5= map.addTilesetImage('Building32×32','pipi');
     var tileset6= map.addTilesetImage('Street32×32','popo');
     var tileset7= map.addTilesetImage('keyTile','keyTile');
+    var tileset8= map.addTilesetImage('key3','keyTile3');
 
     let tilesArray = [tileset1,tileset2,tileset3,tileset4,tileset5,tileset6]
+    let tilesArray1 = [tileset7,tileset8]
 
 
     this.sandLayer = map.createLayer('sand',tilesArray,0,0)
@@ -56,7 +64,7 @@ class gameScene extends Phaser.Scene {
     this.skyLayer = map.createLayer('sky',tilesArray,0,0)
     this.cloudsLayer = map.createLayer('clouds',tilesArray,0,0)
     this.playgroundLayer = map.createLayer('playground',tilesArray,0,0)
-    this.houseLayer = map.createLayer('house',tileset7,0,0)
+    this.houseLayer = map.createLayer('house',tilesArray1,0,0)
 
 
 
@@ -155,7 +163,14 @@ class gameScene extends Phaser.Scene {
 
 
     // load player into phytsics
-    this.player = this.physics.add.sprite(400, 400, 'hero').setScale(1.5).setSize(16,16)
+    this.player = this.physics.add.sprite(400, 400, 'hero').setScale(1.5).setSize(16,32)
+
+    window.player = this.player;
+
+    // key
+    this.key1 = this.add.sprite(30, 50, "key").setScrollFactor(0).setVisible(false);
+    this.key2 = this.add.sprite(70, 50, "key").setScrollFactor(0).setVisible(false);
+    this.key3 = this.add.sprite(110, 50, "key").setScrollFactor(0).setVisible(false);
 
     //NPC movement
     this.bad = this.physics.add.sprite(458.44, 685.52,"badmove").play("123").setScale(1.5);
@@ -194,8 +209,11 @@ class gameScene extends Phaser.Scene {
 
     // this.player.setCollideWorldBounds(true);
 
-    this.houseLayer.setTileIndexCallback(1683, this.removeItem, this);
-    this.houseLayer.setTileIndexCallback(1681, this.removeItem, this);
+    this.houseLayer.setTileIndexCallback(1683, this.removeItem1, this);
+    this.houseLayer.setTileIndexCallback(1681, this.removeItem2, this);
+    this.houseLayer.setTileIndexCallback(1685, this.removeItem3, this);
+
+
 
     this.pathLayer.setCollisionByExclusion(-1, true)
     this.skyLayer.setCollisionByExclusion(-1, true)
@@ -218,6 +236,11 @@ class gameScene extends Phaser.Scene {
     } // end of create //
 
     update () {
+
+      if ( this.player.x > 1228 && this.player.x < 1332 &&
+        this.player.y < 50 && window.keys >=3 ) {
+          this.winScene();
+        }
         if (this.cursors.left.isDown) {
             this.player.body.setVelocityX(-200);
             this.player.anims.play("left", true); // walk left
@@ -304,15 +327,49 @@ class gameScene extends Phaser.Scene {
             });
           }
 
-removeItem(player, tile) {
+
+
+removeItem1(player, tile) {
     console.log("remove item", tile.index);
     this.houseLayer.removeTileAt(tile.x, tile.y); // remove the item
+    this.key1.setVisible(true);
+    window.keys++;
+    this.pingSnd.play();
+    this.cameras.main.shake(100);
+    return false;
+  }
+
+
+  removeItem2(player, tile) {
+    console.log("remove item", tile.index);
+    this.houseLayer.removeTileAt(tile.x, tile.y); // remove the item
+    this.key2.setVisible(true);
+    window.keys++;
+    this.pingSnd.play();
+    this.cameras.main.shake(100);
+    return false;
+  }
+
+  removeItem3(player, tile) {
+    console.log("remove item", tile.index);
+    this.houseLayer.removeTileAt(tile.x, tile.y); // remove the item
+    this.key3.setVisible(true);
+  window.keys++;
+  this.pingSnd.play();
+  this.cameras.main.shake(100);
     return false;
   }
 
   guardOverlap() {
     console.log(" guard overlap player");
+    this.bombSnd.play();
+    // this.cameras.main.shake(1000);
     this.scene.start("gg");
+  }
+
+  winScene(){
+    console.log(" player win");
+    this.scene.start("winScene");
   }
 
     } // end of update // 
